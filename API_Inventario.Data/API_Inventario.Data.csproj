@@ -19,4 +19,8 @@
     <ProjectReference Include="..\API_Inventario.Models\API_Inventario.Models.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Migrations\" />
+  </ItemGroup>
+
 </Project>
