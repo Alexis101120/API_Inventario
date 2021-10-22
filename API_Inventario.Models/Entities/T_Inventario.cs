@@ -15,7 +15,7 @@ namespace API_Inventario.Models.Entities
         public DateTime Fecha { get; set; } = DateTime.Now;
         public bool Activo { get; set; } = true;
         public string Usuario_Id { get; set; }
-        public string Tienda_id { get; set; }
+        public int Tienda_id { get; set; }
         public bool Eliminado { get; set; } = false;
 
 
