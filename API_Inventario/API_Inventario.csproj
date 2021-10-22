@@ -18,12 +18,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Controllers\" />
+    <ProjectReference Include="..\API_Inventario.Data\API_Inventario.Data.csproj" />
+    <ProjectReference Include="..\API_Inventario.Models\API_Inventario.Models.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\API_Inventario.Data\API_Inventario.Data.csproj" />
-    <ProjectReference Include="..\API_Inventario.Models\API_Inventario.Models.csproj" />
+    <Folder Include="Controllers\" />
   </ItemGroup>
 
 </Project>
