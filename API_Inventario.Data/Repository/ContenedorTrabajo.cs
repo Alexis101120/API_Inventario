@@ -11,19 +11,37 @@ namespace API_Inventario.Data.Repository
     {
         private readonly ApplicationDbContext _db;
 
+        public ContenedorTrabajo(ApplicationDbContext db)
+        {
+            _db = db;
+            Usuario = new UsuarioReposotory(db);
+            Producto = new ProductoRepository(db);
+            Tienda = new TiendaRepository(db);
+            Inventario = new InventarioRepository(db);
+            Movimiento_Inventario = new MovimientoInventarioRepository(_db);
+            Producto_Inventario = new ProductoInventarioRepository(_db);
+        }
+
+        public IUsuarioRepository Usuario { get; private set; }
+        public ITiendaRepository Tienda { get; private set; }
+        public IInventarioRepository Inventario { get; private set; }
+        public IMovimientoInventarioRepository Movimiento_Inventario { get; private set; }
+        public IProductoRepository Producto { get; private set; }
+        public IProductoInventarioRepository Producto_Inventario { get; private set; }
+
         public void Dispose()
         {
-            throw new NotImplementedException();
+            _db.Dispose();
         }
 
         public void Save()
         {
-            throw new NotImplementedException();
+            _db.SaveChanges();
         }
 
-        public Task SaveAsync()
+        public async Task SaveAsync()
         {
-            throw new NotImplementedException();
+            await _db.SaveChangesAsync();
         }
     }
 }

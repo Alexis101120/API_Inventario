@@ -21,7 +21,7 @@ namespace API_Inventario.Data
         public DbSet<T_Producto> T_Productos { get; set; }
         public DbSet<T_Inventario> T_Inventarios { get; set; }
         public DbSet<T_Movimientos_Inventario> T_Movimientos_Inventarios { get; set; }
-
+        public DbSet<T_Producto_Inventario> T_Productos_Inventario { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder builder)
@@ -30,6 +30,7 @@ namespace API_Inventario.Data
             builder.Entity<T_Producto>().HasQueryFilter(x => x.Eliminado == false);
             builder.Entity<T_Inventario>().HasQueryFilter(x => x.Eliminado == false);
             builder.Entity<T_Movimientos_Inventario>().HasQueryFilter(x => x.Eliminado == false);
+            builder.Entity<T_Producto_Inventario>().HasQueryFilter(x => x.Eliminado == false);
             base.OnModelCreating(builder);
         }
     }

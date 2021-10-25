@@ -14,6 +14,7 @@ namespace API_Inventario.Models.Entities
         public string Codigo { get; set; }
         public string Descripcion { get; set; }
         public int Tienda_Id { get; set; }
+        
         public bool Eliminado { get; set; } = false;
 
         [ForeignKey("Tienda_Id")]
