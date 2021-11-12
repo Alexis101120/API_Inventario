@@ -9,6 +9,7 @@ namespace API_Inventario.Data.IRepository
 {
     public interface IProductoRepository : IRepository<T_Producto>
     {
-
+        Task<bool> Update(T_Producto item);
+        Task<bool> SoftDelete(int id);
     }
 }

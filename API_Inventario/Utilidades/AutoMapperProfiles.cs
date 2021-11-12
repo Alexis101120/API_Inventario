@@ -15,6 +15,7 @@ namespace API_Inventario.Utilidades
             CreateMap<UsuarioDTO, T_Usuario>().ReverseMap();
             CreateMap<TiendaDTO, T_Tienda>().ReverseMap();
             CreateMap<Tienda_CrearDTO, T_Tienda>().ReverseMap();
+            CreateMap<ProductoDTO, T_Producto>().ReverseMap();
         }
     }
 }

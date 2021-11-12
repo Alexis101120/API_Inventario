@@ -94,7 +94,7 @@ namespace API_Inventario.Controllers
             }
         }
 
-        [HttpDelete("{TiendaId:int}")]
+        [HttpPost("{TiendaId:int}")]
         public async Task<IActionResult> Delete(int TiendaId)
         {
             try
