@@ -12,9 +12,13 @@ namespace API_Inventario.Utilidades
     {
         public AutoMapperProfiles()
         {
-            CreateMap<UsuarioDTO, T_Usuario>().ReverseMap();
-            CreateMap<TiendaDTO, T_Tienda>().ReverseMap();
-            CreateMap<Tienda_CrearDTO, T_Tienda>().ReverseMap();
+            CreateMap<T_Usuario, UsuarioDTO>();
+            CreateMap<Usuario_CrearDTO, T_Usuario>();
+            CreateMap<T_Tienda, TiendaDTO>();
+            CreateMap<Tienda_CrearDTO, T_Tienda>();
+            CreateMap<T_Inventario, InventarioDTO>();
+            CreateMap<Inventario_CrearDTO, T_Inventario>();
+
         }
     }
 }
