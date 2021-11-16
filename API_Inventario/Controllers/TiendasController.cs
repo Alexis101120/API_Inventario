@@ -1,4 +1,6 @@
 ﻿using API_Inventario.Data.IRepository;
+using API_Inventario.Models.DTO;
+using API_Inventario.Models.Entities;
 using AutoMapper;
 using API_Inventario.Models.DTO;
 using Microsoft.AspNetCore.Http;
