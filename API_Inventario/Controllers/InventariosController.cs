@@ -122,6 +122,5 @@ namespace API_Inventario.Controllers
                 return StatusCode(500, new { success = false, mensaje = "Error del lado del servidor" });
             }
         }
-
     }
 }
