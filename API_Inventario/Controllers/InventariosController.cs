@@ -42,6 +42,21 @@ namespace API_Inventario.Controllers
             }
         }
 
+        [HttpGet("ObtenTodo/{TiendaId:int}")]
+        public async Task<IActionResult> ObtenTodo(int TiendaId)
+        {
+            try
+            {
+                var Inventarios = await _ctx.Inventario.GetAllasync(x => x.Tienda_id == TiendaId);
+                var Inventarios_DTO = _mapper.Map<List<InventarioDTO>>(Inventarios);
+                return Ok(new { success = true, data = Inventarios_DTO });
+            }catch(Exception ex)
+            {
+                _logger.LogError($"{ex.Message} => {ex.StackTrace}");
+                return StatusCode(500, new { success = false, mensaje = "Error del lado del servidor" });
+            }
+        }
+
         [HttpGet("Abrir/{InventarioId:int}")]
         public async Task<IActionResult> Abrir(int InventarioId)
         {
@@ -81,21 +96,6 @@ namespace API_Inventario.Controllers
                 }
             }
             catch (Exception ex)
-            {
-                _logger.LogError($"{ex.Message} => {ex.StackTrace}");
-                return StatusCode(500, new { success = false, mensaje = "Error del lado del servidor" });
-            }
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> Get()
-        {
-            try
-            {
-                var Inventarios = await _ctx.Inventario.GetAllasync();
-                var InventariosDTO = _mapper.Map<InventarioDTO>(Inventarios);
-                return Ok(new { success = true, data = InventariosDTO });
-            }catch(Exception ex)
             {
                 _logger.LogError($"{ex.Message} => {ex.StackTrace}");
                 return StatusCode(500, new { success = false, mensaje = "Error del lado del servidor" });

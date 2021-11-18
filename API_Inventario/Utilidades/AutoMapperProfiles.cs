@@ -18,7 +18,8 @@ namespace API_Inventario.Utilidades
             CreateMap<Tienda_CrearDTO, T_Tienda>();
             CreateMap<T_Inventario, InventarioDTO>();
             CreateMap<Inventario_CrearDTO, T_Inventario>();
-
+            CreateMap<T_Producto, ProductoDTO>();
+            CreateMap<Producto_CrearDTO, T_Producto>();
         }
     }
 }

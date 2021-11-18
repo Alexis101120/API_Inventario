@@ -9,6 +9,6 @@ namespace API_Inventario.Data.IRepository
 {
     public interface IProductoRepository : IRepository<T_Producto>
     {
-
+        Task Update(T_Producto item);
     }
 }
