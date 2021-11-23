@@ -1,4 +1,5 @@
 ﻿using API_Inventario.Data.IRepository;
+using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query;
 using System;
@@ -29,6 +30,11 @@ namespace API_Inventario.Data.Repository
         public async Task AddAsync(T entity)
         {
             await dbSet.AddAsync(entity);
+        }
+
+        public void BulkInsert(List<T> entities)
+        {
+            Context.BulkInsert(entities);
         }
 
         public T Get(int id)

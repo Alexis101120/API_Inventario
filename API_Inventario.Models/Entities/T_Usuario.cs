@@ -15,5 +15,7 @@ namespace API_Inventario.Models.Entities
         public string Nombre_Completo { get; set; }
         public string Tipo_Usuario { get; set; }
         public string Acceso { get; set; }
+        public string Key { get; set; }
+        public DateTime Expiration { get; set; }
     }
 }

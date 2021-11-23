@@ -65,7 +65,9 @@ namespace API_Inventario.Controllers
                 if (ModelState.IsValid)
                 {
                     var Usuario = _mapper.Map<T_Usuario>(item);
-                    var Password = _GetRandomPassword(7);
+                    var Password = _GetRandomPassword(6);
+                    Usuario.Acceso = Password;
+                    Usuario.Nombre_Completo = $"{Usuario.Nombres} {(Usuario.Apellido_Paterno == null ? "" : Usuario.Apellido_Paterno)} {(Usuario.Apellido_Materno == null ? "" : Usuario.Apellido_Materno)}";
                     var Result = await _userManager.CreateAsync(Usuario, Password);
                     if (Result.Succeeded)
                     {

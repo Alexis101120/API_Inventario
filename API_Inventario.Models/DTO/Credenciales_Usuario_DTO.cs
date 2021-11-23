@@ -7,13 +7,11 @@ using System.Threading.Tasks;
 
 namespace API_Inventario.Models.DTO
 {
-    public class Usuario_CrearDTO
+    public class Credenciales_Usuario_DTO
     {
         [Required]
-        public string Nombres { get; set; }
-        public string Apellido_Paterno { get; set; }
-        public string Apellito_Materno { get; set; }
         public string UserName { get; set; }
-        public string Tipo_Usuario { get; set; }
+        [Required]
+        public string Password { get; set; }
     }
 }

@@ -15,5 +15,15 @@ namespace API_Inventario.Data.Repository
         {
             _db = db;
         }
+
+        public Task<bool> SoftDelete(int id)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<bool> Update(T_Producto item)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

@@ -37,6 +37,7 @@ namespace API_Inventario.Data.IRepository
         );
 
         void Add(T entity);
+        void BulkInsert(List<T> entities);
 
         Task AddAsync(T entity);
 

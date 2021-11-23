@@ -2,10 +2,13 @@
 using API_Inventario.Models.DTO;
 using API_Inventario.Models.Entities;
 using AutoMapper;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using OfficeOpenXml;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -17,11 +20,13 @@ namespace API_Inventario.Controllers
     {
         private readonly IContenedorTrabajo _ctx;
         private readonly IMapper _mapper;
+        private readonly IWebHostEnvironment _host;
 
-        public ProductosController(IContenedorTrabajo ctx, IMapper mapper)
+        public ProductosController(IContenedorTrabajo ctx, IMapper mapper, IWebHostEnvironment host)
         {
             _ctx = ctx;
             _mapper = mapper;
+            _host = host;
         }
 
         [HttpGet("{Codigo}")]
@@ -34,7 +39,7 @@ namespace API_Inventario.Controllers
                 return Ok(new { success = true, data = ProductoDTO });
             }catch(Exception ex)
             {
-                return StatusCode(500, new { success = false, data = "Ocurrio un error en el servidor, intentelo de nuevo" });
+                return StatusCode(500, new { success = false, mensaje = "Ocurrio un error en el servidor, intentelo de nuevo" });
             }
         }
 
@@ -43,13 +48,13 @@ namespace API_Inventario.Controllers
         {
             try
             {
-                var Productos = _ctx.Producto.GetAllasync(x => x.Tienda_Id == TiendaId);
+                var Productos = await _ctx.Producto.GetAllasync(x => x.Tienda_Id == TiendaId);
                 var ProductosDTO = _mapper.Map<List<ProductoDTO>>(Productos);
                 return Ok(new { success = true, data = ProductosDTO });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { success = false, data = "Ocurrio un error en el servidor, intentelo de nuevo" });
+                return StatusCode(500, new { success = false, mensaje = "Ocurrio un error en el servidor, intentelo de nuevo" });
             }
         }
 
@@ -61,9 +66,61 @@ namespace API_Inventario.Controllers
                 var Producto = _mapper.Map<T_Producto>(item);
                 await _ctx.Producto.AddAsync(Producto);
                 await _ctx.SaveAsync();
-                return Ok(new { success = true, data = "Producto agregado con éxito" });
+                return Ok(new { success = true, mensaje = "Producto agregado con éxito" });
             }
-            return BadRequest(new { success = false, data = "Error al registrar producto, verifique sus datos" });
+            return BadRequest(new { success = false, mensaje = "Error al registrar producto, verifique sus datos" });
+        }
+
+        [HttpPost("LeerExcel")]
+        public async Task<IActionResult> Post([FromForm] Productos_Excel_DTO item)
+        {
+            try
+            {
+                if (item.Excel != null)
+                {
+                    var Ruta_Principal = _host.WebRootPath;
+                    string Ruta_Temporales = Path.Combine(Ruta_Principal, @"Temporales\");
+                    string Nombre_Archivo = item.Excel.FileName;
+                    if (!Directory.Exists(Ruta_Temporales)) Directory.CreateDirectory(Ruta_Temporales);
+                    using (var filestram = new FileStream(Path.Combine(Ruta_Temporales, Nombre_Archivo), FileMode.Create))
+                    {
+                        await item.Excel.CopyToAsync(filestram);
+                    }
+                    FileInfo file = new FileInfo(Path.Combine(Ruta_Temporales, Nombre_Archivo));
+                    ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+                    using (ExcelPackage package = new ExcelPackage(file))
+                    {
+                        ExcelWorksheet worksheet = package.Workbook.Worksheets.FirstOrDefault();
+                        if (worksheet == null)
+                        {
+                            return NotFound(new { codigo = "404", mensaje = "Error al cargar datos, verifique su archivo" });
+                        }
+                        else
+                        {
+                            var Numero_Filas = worksheet.Dimension.Rows;
+                            var Productos = new List<T_Producto>();
+                            for(int Fila = 2; Fila<=Numero_Filas; Fila++)
+                            {
+                                var Producto = new T_Producto
+                                {
+                                    Codigo = Convert.ToString(worksheet.Cells[Fila, 1].Value.ToString().Trim()),
+                                    Descripcion = Convert.ToString(worksheet.Cells[Fila, 2].Value.ToString().Trim()),
+                                    Tienda_Id = item.TiendaId
+                                };
+                                Productos.Add(Producto);
+                            }
+
+                            _ctx.Producto.BulkInsert(Productos);
+                            return Ok(new { success = true, mensaje = "Productos agregados con éxito" });
+                        }
+                    }
+                }
+                return Ok(new { success = true, mensaje = "No hay excel" });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { success = false, mensaje = "Ocurrio un error en el servidor, intentelo de nuevo" });
+            }
         }
 
         [HttpPut("{Codigo}")]
@@ -75,9 +132,9 @@ namespace API_Inventario.Controllers
                 Producto.Codigo = Codigo;
                 await _ctx.Producto.Update(Producto);
                 await _ctx.SaveAsync();
-                return Ok(new { success = true, data = "Producto agregado con éxito" });
+                return Ok(new { success = true, mensaje = "Producto agregado con éxito" });
             }
-            return BadRequest(new { success = false, data = "Error al registrar producto, verifique sus datos" });
+            return BadRequest(new { success = false, mensaje = "Error al registrar producto, verifique sus datos" });
 
         }
 

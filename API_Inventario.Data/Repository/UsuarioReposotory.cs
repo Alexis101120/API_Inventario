@@ -43,5 +43,20 @@ namespace API_Inventario.Data.Repository
                 return false;
             }
         }
+
+        public async Task<bool> UpdateKey(string UsuarioId, string Key, DateTime Expiration)
+        {
+            try
+            {
+
+                var Usuario = await _db.T_Usuarios.FirstOrDefaultAsync(x => x.Id == UsuarioId);
+                Usuario.Key = Key;
+                Usuario.Expiration = Expiration;
+                return true;
+            }catch(Exception ex)
+            {
+                return false;
+            }
+        }
     }
 }
