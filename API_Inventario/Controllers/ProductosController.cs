@@ -68,9 +68,13 @@ namespace API_Inventario.Controllers
                     var Producto = _mapper.Map<T_Producto>(item);
                     await _ctx.Producto.AddAsync(Producto);
                     await _ctx.SaveAsync();
-                return Ok(new { success = true, mensaje = "Producto agregado con éxito" });
+                    return Ok(new { success = true, mensaje = "Producto agregado con éxito" });
+                }
+                return BadRequest(new { success = false, mensaje = "Error al registrar producto, verifique sus datos" });
+            }catch(Exception ex)
+            {
+                return StatusCode(500, new { success = false, mensaje = "Ocurrio un error en el servidor, intentelo de nuevo" });
             }
-            return BadRequest(new { success = false, mensaje = "Error al registrar producto, verifique sus datos" });
         }
 
         [HttpPost("LeerExcel")]

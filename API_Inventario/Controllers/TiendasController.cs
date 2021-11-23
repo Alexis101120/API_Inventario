@@ -11,7 +11,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using API_Inventario.Models.Entities;
+using API_Inventario.Services;
 
 namespace API_Inventario.Controllers
 {
@@ -22,12 +22,15 @@ namespace API_Inventario.Controllers
         private readonly IContenedorTrabajo _ctx;
         private readonly IMapper _mapper;
         private readonly ILogger<TiendasController> _logger;
+        private readonly IAlmacenadorArchivos _almacenador;
 
-        public TiendasController(IContenedorTrabajo ctx, IMapper mapper, ILogger<TiendasController> logger)
+
+        public TiendasController(IContenedorTrabajo ctx, IMapper mapper, ILogger<TiendasController> logger, IAlmacenadorArchivos almacenador)
         {
             _ctx = ctx;
             _mapper = mapper;
             _logger = logger;
+            _almacenador = almacenador;
         }
 
         [HttpGet]
@@ -62,14 +65,26 @@ namespace API_Inventario.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Post([FromBody] Tienda_CrearDTO item)
+        public async Task<IActionResult> Post([FromForm] Tienda_CrearDTO item)
         {
             try
             {
                 if (ModelState.IsValid)
                 {
                     var Tienda = _mapper.Map<T_Tienda>(item);
+                    if (item.Logo != null)
+                    {
+                        using (var memoryStream = new MemoryStream())
+                        {
+                            await item.Logo.CopyToAsync(memoryStream);
+                            var contenido = memoryStream.ToArray();
+                            var extension = Path.GetExtension(item.Logo.FileName);
+                            var Carpeta = @"Imagenes\Tiendas";
+                            Tienda.Logo_url = await _almacenador.GuardarArchivo(contenido, extension, Carpeta, item.Logo.ContentType);
+                        }
+                    }
                     await _ctx.Tienda.AddAsync(Tienda);
+                    await _ctx.SaveAsync();
                     return Ok(new { success = true, mensaje = "Tienda registrada con éxito" });
                 }
                 string Errores = "";

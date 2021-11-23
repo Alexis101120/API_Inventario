@@ -2,6 +2,7 @@ using API_Inventario.Data;
 using API_Inventario.Data.IRepository;
 using API_Inventario.Data.Repository;
 using API_Inventario.Models.Entities;
+using API_Inventario.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -42,7 +43,7 @@ namespace API_Inventario
                 options.User.RequireUniqueEmail = false;
             }).AddEntityFrameworkStores<ApplicationDbContext>().AddDefaultTokenProviders();
             services.AddScoped<IContenedorTrabajo, ContenedorTrabajo>();
-
+            services.AddTransient<IAlmacenadorArchivos, AlmacenadorArchivos>();
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "API_Inventarios", Version = "v1" });
@@ -93,7 +94,7 @@ namespace API_Inventario
             app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "API_Inventarios v1"));
 
             app.UseHttpsRedirection();
-
+            app.UseStaticFiles();
             app.UseRouting();
             app.UseCors("CorsPolicy");
             app.UseAuthorization();
