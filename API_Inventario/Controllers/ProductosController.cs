@@ -61,11 +61,13 @@ namespace API_Inventario.Controllers
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] ProductoDTO item)
         {
-            if (ModelState.IsValid)
+            try
             {
-                var Producto = _mapper.Map<T_Producto>(item);
-                await _ctx.Producto.AddAsync(Producto);
-                await _ctx.SaveAsync();
+                if (ModelState.IsValid)
+                {
+                    var Producto = _mapper.Map<T_Producto>(item);
+                    await _ctx.Producto.AddAsync(Producto);
+                    await _ctx.SaveAsync();
                 return Ok(new { success = true, mensaje = "Producto agregado con éxito" });
             }
             return BadRequest(new { success = false, mensaje = "Error al registrar producto, verifique sus datos" });
@@ -116,7 +118,7 @@ namespace API_Inventario.Controllers
                     }
                 }
                 return Ok(new { success = true, mensaje = "No hay excel" });
-            }
+                }
             catch (Exception ex)
             {
                 return StatusCode(500, new { success = false, mensaje = "Ocurrio un error en el servidor, intentelo de nuevo" });
@@ -125,13 +127,13 @@ namespace API_Inventario.Controllers
 
         [HttpPut("{Codigo}")]
         public async Task<IActionResult> Put(string Codigo, [FromBody] ProductoDTO item)
-        {
-            if (ModelState.IsValid)
             {
-                var Producto = _mapper.Map<T_Producto>(item);
-                Producto.Codigo = Codigo;
-                await _ctx.Producto.Update(Producto);
-                await _ctx.SaveAsync();
+                if (ModelState.IsValid)
+                {
+                    var Producto = _mapper.Map<T_Producto>(item);
+                    Producto.Codigo = Codigo;
+                    await _ctx.Producto.Update(Producto);
+                    await _ctx.SaveAsync();
                 return Ok(new { success = true, mensaje = "Producto agregado con éxito" });
             }
             return BadRequest(new { success = false, mensaje = "Error al registrar producto, verifique sus datos" });

@@ -10,6 +10,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
+using API_Inventario.Models.Entities;
 
 namespace API_Inventario.Controllers
 {
@@ -19,25 +21,13 @@ namespace API_Inventario.Controllers
     {
         private readonly IContenedorTrabajo _ctx;
         private readonly IMapper _mapper;
+        private readonly ILogger<TiendasController> _logger;
 
-        public TiendasController(IContenedorTrabajo ctx, IMapper mapper)
+        public TiendasController(IContenedorTrabajo ctx, IMapper mapper, ILogger<TiendasController> logger)
         {
             _ctx = ctx;
             _mapper = mapper;
-        }
-
-        [HttpGet("{TiendaId:int}")]
-        public async Task<IActionResult> Get(int TiendaId)
-        {
-            try
-            {
-                var Tienda = await _ctx.Tienda.GetFirstOrdefaultAsync(x => x.Id == TiendaId);
-                var TiendaDTO = _mapper.Map<TiendaDTO>(Tienda);
-                return Ok(new { success = true, data = TiendaDTO });
-            }catch(Exception ex)
-            {
-                return StatusCode(500, new { success = false, data = "Ocurrio un error en el servidor, intentelo de nuevo" });
-            }
+            _logger = logger;
         }
 
         [HttpGet]
@@ -48,15 +38,31 @@ namespace API_Inventario.Controllers
                 var Tiendas = await _ctx.Tienda.GetAllasync();
                 var TiendasDTO = _mapper.Map<List<TiendaDTO>>(Tiendas);
                 return Ok(new { success = true, data = TiendasDTO });
+            }catch(Exception ex)
+            {
+                _logger.LogError($"{ex.Message} => {ex.StackTrace}");
+                return StatusCode(500, new { success = false, mensaje = "Error del lado del servidor" });
+            }
+        }
+
+        [HttpGet("{TiendaId:int}")]
+        public async Task<IActionResult> Get(int TiendaId)
+        {
+            try
+            {
+                var Tienda = await _ctx.Tienda.GetFirstOrdefaultAsync(x => x.Id == TiendaId);
+                var TiendaDTO = _mapper.Map<TiendaDTO>(Tienda);
+                return Ok(new { success = true, data = TiendaDTO });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { success = false, data = "Ocurrio un error en el servidor, intentelo de nuevo" });
+                _logger.LogError($"{ex.Message} => {ex.StackTrace}");
+                return StatusCode(500, new { success = false, mensaje = "Error del lado del servidor" });
             }
         }
 
         [HttpPost]
-        public async Task<IActionResult> Post([FromBody]Tienda_CrearDTO item)
+        public async Task<IActionResult> Post([FromBody] Tienda_CrearDTO item)
         {
             try
             {
@@ -64,19 +70,28 @@ namespace API_Inventario.Controllers
                 {
                     var Tienda = _mapper.Map<T_Tienda>(item);
                     await _ctx.Tienda.AddAsync(Tienda);
-                    await _ctx.SaveAsync();
-                    return Ok(new { success = true, data = "Tienda agregada con éxito" });
+                    return Ok(new { success = true, mensaje = "Tienda registrada con éxito" });
                 }
-                return BadRequest(new { success = false, data = "Error al registrar tienda, verifique sus datos"  });
-            }
-            catch(Exception ex)
+                string Errores = "";
+                var Errores_Modelo = ModelState.Values;
+                foreach(var Values in Errores_Modelo)
+                {
+                   foreach(var Error in Values.Errors)
+                    {
+                        Errores += Error.ErrorMessage;
+                        Errores += Environment.NewLine;
+                    }
+                }
+                return BadRequest(new { success = false, mensaje = Errores });
+            }catch(Exception ex)
             {
-                return StatusCode(500, new { success = false, data = "Ocurrio un error en el servidor, intentelo de nuevo" });
+                _logger.LogError($"{ex.Message} => {ex.StackTrace}");
+                return StatusCode(500, new { success = false, mensaje = "Error del lado del servidor" });
             }
         }
 
         [HttpPut("{TiendaId:int}")]
-        public async Task<IActionResult> Put(int TiendaId, [FromBody]Tienda_CrearDTO item)
+        public async Task<IActionResult> Put(int TiendaId, [FromBody] Tienda_CrearDTO item)
         {
             try
             {
@@ -86,29 +101,33 @@ namespace API_Inventario.Controllers
                     Tienda.Id = TiendaId;
                     await _ctx.Tienda.Update(Tienda);
                     await _ctx.SaveAsync();
-                    return Ok(new { success = true, data = "Tienda editada con éxito" });
+                    return Ok(new { success = true, mensaje = "Tienda actualizada con éxito" });
                 }
-                return BadRequest(new { success = false, data = "Error al registrar tienda, verifique sus datos" });
+                string Errores = "";
+                var Errores_Modelo = ModelState.Values;
+                foreach (var Values in Errores_Modelo)
+                {
+                    foreach (var Error in Values.Errors)
+                    {
+                        Errores += Error.ErrorMessage;
+                        Errores += Environment.NewLine;
+                    }
+                }
+                return BadRequest(new { success = false, mensaje = Errores });
             }
             catch(Exception ex)
             {
-                return StatusCode(500, new { success = false, data = "Ocurrio un error en el servidor, intentelo de nuevo" });
+                _logger.LogError($"{ex.Message} => {ex.StackTrace}");
+                return StatusCode(500, new { success = false, mensaje = "Error del lado del servidor" });
             }
         }
 
         [HttpDelete("{TiendaId:int}")]
         public async Task<IActionResult> Delete(int TiendaId)
         {
-            try
-            {
-                await _ctx.Tienda.SoftDelete(TiendaId);
-                await _ctx.SaveAsync();
-                return Ok(new { success = true, data = "Tienda eliminada con éxito" });
-            }catch(Exception ex)
-            {
-                return StatusCode(500, new { success = false, data = "Ocurrio un error en el servidor, intentelo de nuevo" });
-            }
+            _ctx.Tienda.Remove(TiendaId);
+            await _ctx.SaveAsync();
+            return Ok(new { success = true });
         }
-
     }
 }

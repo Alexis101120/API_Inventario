@@ -1,5 +1,6 @@
 ﻿using API_Inventario.Data.IRepository;
 using API_Inventario.Models.Entities;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;

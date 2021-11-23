@@ -34,6 +34,7 @@ namespace API_Inventario
         {
 
             services.AddAutoMapper(typeof(Startup));
+            services.AddHttpContextAccessor();
             services.AddControllers().AddNewtonsoftJson(options => options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
             services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
             services.AddIdentity<T_Usuario, IdentityRole>(options =>
@@ -41,6 +42,7 @@ namespace API_Inventario
                 options.User.RequireUniqueEmail = false;
             }).AddEntityFrameworkStores<ApplicationDbContext>().AddDefaultTokenProviders();
             services.AddScoped<IContenedorTrabajo, ContenedorTrabajo>();
+
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "API_Inventarios", Version = "v1" });
