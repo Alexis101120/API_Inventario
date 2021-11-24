@@ -4,6 +4,7 @@ using API_Inventario.Models.Entities;
 using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -32,8 +33,9 @@ namespace API_Inventario.Controllers
         {
             try
             {
-                var Inventario = await _ctx.Inventario.GetFirstOrdefaultAsync(x => x.Id == InventarioId);
+                var Inventario = await _ctx.Inventario.GetFirstOrdefaultAsync(x => x.Id == InventarioId, include:source=> source.Include(x=> x.Usuario));
                 var InventarioDto = _mapper.Map<InventarioDTO>(Inventario);
+                InventarioDto.Usuario = Inventario.Usuario.Nombre_Completo;
                 return Ok(new { succesS = true, data = InventarioDto });
             }catch(Exception ex)
             {

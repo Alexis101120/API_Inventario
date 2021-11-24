@@ -11,6 +11,7 @@ namespace API_Inventario.Models.DTO
         public int Id { get; set; }
         public DateTime Fecha { get; set; } = DateTime.Now;
         public bool Activo { get; set; } = true;
+        public string Usuario { get; set; }
         public string Usuario_Id { get; set; }
         public string Tienda_id { get; set; }
     }
