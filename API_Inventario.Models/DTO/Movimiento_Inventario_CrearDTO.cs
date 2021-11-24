@@ -10,7 +10,6 @@ namespace API_Inventario.Models.DTO
     {
         public string Codigo { get; set; }
         public int Cantidad { get; set; }
-        public DateTime Fech_Registro { get; set; } = DateTime.Now;
         public int Inventario_Id { get; set; }
     }
 }

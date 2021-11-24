@@ -16,6 +16,7 @@ namespace API_Inventario.Models.Entities
         public bool Activo { get; set; } = true;
         public string Usuario_Id { get; set; }
         public int Tienda_id { get; set; }
+        public string Nombre { get; set; }
         public bool Eliminado { get; set; } = false;
 
 
