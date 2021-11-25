@@ -53,7 +53,7 @@ namespace API_Inventario.Controllers
         {
             try
             {
-                var Inventarios = await _ctx.Inventario.GetAllasync(x => x.Tienda_id == TiendaId);
+                var Inventarios = await _ctx.Inventario.GetAllasync(x => x.Tienda_id == TiendaId, include: source=> source.Include(x=> x.Usuario));
                 var Inventarios_DTO = _mapper.Map<List<InventarioDTO>>(Inventarios);
                 return Ok(new { success = true, data = Inventarios_DTO });
             }catch(Exception ex)
@@ -131,18 +131,6 @@ namespace API_Inventario.Controllers
             }
         }
 
-        [HttpPut("{InventarioId: int}")]
-        public async Task<IActionResult> Put(int InventarioId, [FromBody] Inventario_CrearDTO item)
-        {
-            try
-            {
-                var Inventario = _mapper.Map<T_Inventario>(item);
-                await _ctx.Inventario.
-            }catch(Exception ex)
-            {
-                _logger.LogError($"{ex.Message} => {ex.StackTrace}");
-                return StatusCode(500, new { success = false, mensaje = "Error del lado del servidor" });
-            }
-        }
+        
     }
 }
