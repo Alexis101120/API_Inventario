@@ -12,5 +12,6 @@ namespace API_Inventario.Data.IRepository
         Task<bool> Eliminar(int id);
         Task<bool> Abrir(int id);
         Task<bool> Cerrar(int id);
+        Task<bool> Update(T_Inventario item);
     }
 }

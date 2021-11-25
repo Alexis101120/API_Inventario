@@ -9,5 +9,6 @@ namespace API_Inventario.Data.IRepository
 {
     public interface IProductoInventarioRepository : IRepository<T_Producto_Inventario>
     {
+        Task Update(T_Producto_Inventario item, int conteo);
     }
 }

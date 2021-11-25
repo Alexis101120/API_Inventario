@@ -58,5 +58,21 @@ namespace API_Inventario.Data.Repository
                 return false;
             }
         }
+
+        public async Task<bool> Update(T_Inventario item)
+        {
+            try
+            {
+                var Inventario = await _db.T_Inventarios.FirstOrDefaultAsync(x => x.Id == item.Id);
+                Inventario.Fecha = item.Fecha;
+                Inventario.Nombre = item.Nombre;
+                Inventario.Activo = item.Activo;
+                return true;
+            }
+            catch(Exception ex)
+            {
+                return false;
+            }
+        }
     }
 }

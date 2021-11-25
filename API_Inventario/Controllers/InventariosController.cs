@@ -2,6 +2,8 @@
 using API_Inventario.Models.DTO;
 using API_Inventario.Models.Entities;
 using AutoMapper;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -9,12 +11,14 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace API_Inventario.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class InventariosController : ControllerBase
     {
         private readonly IContenedorTrabajo _ctx;
@@ -111,7 +115,9 @@ namespace API_Inventario.Controllers
             {
                 if (ModelState.IsValid)
                 {
+                    var usuarioId = HttpContext.User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier).Value;
                     var Inventario = _mapper.Map<T_Inventario>(item);
+                    Inventario.Usuario_Id = usuarioId;
                     await _ctx.Inventario.AddAsync(Inventario);
                     await _ctx.SaveAsync();
                     return Ok(new { success = true, mensaje = "Inventario creado con éxito" });
@@ -119,6 +125,20 @@ namespace API_Inventario.Controllers
                 return Ok(new { success = false, mensaje = "Error al crear inventrario" });
             }
             catch(Exception ex)
+            {
+                _logger.LogError($"{ex.Message} => {ex.StackTrace}");
+                return StatusCode(500, new { success = false, mensaje = "Error del lado del servidor" });
+            }
+        }
+
+        [HttpPut("{InventarioId: int}")]
+        public async Task<IActionResult> Put(int InventarioId, [FromBody] Inventario_CrearDTO item)
+        {
+            try
+            {
+                var Inventario = _mapper.Map<T_Inventario>(item);
+                await _ctx.Inventario.
+            }catch(Exception ex)
             {
                 _logger.LogError($"{ex.Message} => {ex.StackTrace}");
                 return StatusCode(500, new { success = false, mensaje = "Error del lado del servidor" });
