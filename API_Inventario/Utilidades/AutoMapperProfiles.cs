@@ -19,6 +19,8 @@ namespace API_Inventario.Utilidades
             CreateMap<ProductoDTO, T_Producto>().ReverseMap();
             CreateMap<T_Inventario, InventarioDTO>().ForMember(x=> x.Usuario , options=> options.MapFrom(x=> x.Usuario.Nombre_Completo));
             CreateMap<Inventario_CrearDTO, T_Inventario>();
+            CreateMap<T_Movimientos_Inventario, MovimientoInventarioDTO>().ForMember(x => x.Descripcion, options => options.MapFrom(x => x.Producto.Descripcion));
+            CreateMap<Movimiento_Inventario_CrearDTO, T_Movimientos_Inventario>();
         }
     }
 }

@@ -10,9 +10,10 @@ namespace API_Inventario.Models.DTO
     {
         public int Id { get; set; }
         public string Codigo { get; set; }
+        public string Descripcion { get; set; }
         public int Cantidad { get; set; }
         public DateTime Fech_Registro { get; set; }
-        public string Usuario_Id { get; set; }
+        public string Usuario { get; set; }
         public int Inventario_Id { get; set; }
     }
 }

@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -52,7 +53,7 @@ namespace API_Inventario.Controllers
         {
             try
             {
-                var Movimientos = await _ctx.Movimiento_Inventario.GetAllasync(x => x.Inventario_Id == InventarioId);
+                var Movimientos = await _ctx.Movimiento_Inventario.GetAllasync(x => x.Inventario_Id == InventarioId, include: source=> source.Include(x=> x.Producto));
                 var MovimientosDTO = _mapper.Map<List<MovimientoInventarioDTO>>(Movimientos);
                 return Ok(new { success = true, data = MovimientosDTO });
             }catch(Exception ex)
@@ -69,8 +70,21 @@ namespace API_Inventario.Controllers
             {
                 var usuarioId = HttpContext.User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier).Value;
                 var Movimiento = _mapper.Map<T_Movimientos_Inventario>(item);
+                var Inventario = await _ctx.Inventario.GetFirstOrdefaultAsync(x => x.Id == item.Inventario_Id);
                 Movimiento.Usuario_Id = usuarioId;
                 await _ctx.Movimiento_Inventario.AddAsync(Movimiento);
+                var Producto_Cat = await _ctx.Producto.GetFirstOrdefaultAsync(x => x.Codigo == item.Codigo);
+                if(Producto_Cat == null)
+                {
+                    Producto_Cat = new T_Producto
+                    {
+                        Codigo = item.Codigo,
+                        Descripcion = item.Descripcion,
+                        Tienda_Id = Inventario.Tienda_id
+                    };
+                    await _ctx.Producto.AddAsync(Producto_Cat);
+                    await _ctx.SaveAsync();
+                }
                 var Producto = await _ctx.Producto_Inventario.GetFirstOrdefaultAsync(x => x.Codigo == item.Codigo);
                 if(Producto == null)
                 {
