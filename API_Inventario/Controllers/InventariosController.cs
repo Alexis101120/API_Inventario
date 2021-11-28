@@ -131,6 +131,22 @@ namespace API_Inventario.Controllers
             }
         }
 
+        [HttpPut("InventarioId:int")]
+        public async Task<IActionResult> Put(int InventarioId, [FromBody]Inventario_CrearDTO item)
+        {
+            try
+            {
+                var Inventario = _mapper.Map<T_Inventario>(item);
+                Inventario.Id = InventarioId;
+                await _ctx.Inventario.Update(Inventario);
+                await _ctx.SaveAsync();
+                return Ok(new { success = true, mensaje = "Inventario actualizado con éxito" });
+            }catch(Exception ex)
+            {
+                _logger.LogError($"{ex.Message} => {ex.StackTrace}");
+                return StatusCode(500, new { success = false, mensaje = "Error del lado del servidor" });
+            }
+        }
         
     }
 }

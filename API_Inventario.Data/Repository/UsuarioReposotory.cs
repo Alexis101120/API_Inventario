@@ -48,7 +48,6 @@ namespace API_Inventario.Data.Repository
         {
             try
             {
-
                 var Usuario = await _db.T_Usuarios.FirstOrDefaultAsync(x => x.Id == UsuarioId);
                 Usuario.Key = Key;
                 Usuario.Expiration = Expiration;

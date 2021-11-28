@@ -37,7 +37,7 @@ namespace API_Inventario.Controllers
         {
             try
             {
-                var Movimiento = await _ctx.Movimiento_Inventario.GetFirstOrdefaultAsync(x => x.Id == MovimientoId);
+                var Movimiento = await _ctx.Movimiento_Inventario.GetFirstOrdefaultAsync(x => x.Id == MovimientoId,include: source=> source.Include(x=> x.Usuario));
                 var MovimientoDTO = _mapper.Map<MovimientoInventarioDTO>(Movimiento);
                 return Ok(new { success = true, data = MovimientoDTO });
             }
@@ -109,6 +109,23 @@ namespace API_Inventario.Controllers
                 _logger.LogError($"{ex.Message} => {ex.StackTrace}");
                 return StatusCode(500, new { success = false, mensaje = "Error del lado del servidor" });
 
+            }
+        }
+
+        [HttpPut("{MovimientoId:int}")]
+        public async Task<IActionResult> Put(int MovimientoId, [FromBody] Movimiento_Inventario_CrearDTO item)
+        {
+            try
+            {
+                var Inventario = _mapper.Map<T_Movimientos_Inventario>(item);
+                Inventario.Id = MovimientoId;
+                await _ctx.Movimiento_Inventario.Update(Inventario);
+                await _ctx.SaveAsync();
+                return Ok(new { success = true, mensaje = "Movimiento actualizado con éxito" });
+            }catch(Exception ex)
+            {
+                _logger.LogError($"{ex.Message} => {ex.StackTrace}");
+                return StatusCode(500, new { success = false, mensaje = "Error del lado del servidor" });
             }
         }
     }

@@ -75,7 +75,5 @@ namespace API_Inventario.Controllers
             _ctx.Save();
             return Token;
         }
-
-
     }
 }
