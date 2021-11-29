@@ -33,8 +33,8 @@ namespace API_Inventario.Controllers
             _host = host;
         }
 
-        [HttpGet("{Codigo}")]
-        public async Task<IActionResult> Get(string Codigo)
+        [HttpGet("ByCodigo/{Codigo}")]
+        public async Task<IActionResult> ByCodigo(string Codigo)
         {
             try
             {

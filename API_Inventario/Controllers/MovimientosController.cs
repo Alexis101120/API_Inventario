@@ -53,7 +53,7 @@ namespace API_Inventario.Controllers
         {
             try
             {
-                var Movimientos = await _ctx.Movimiento_Inventario.GetAllasync(x => x.Inventario_Id == InventarioId, include: source=> source.Include(x=> x.Producto));
+                var Movimientos = await _ctx.Movimiento_Inventario.GetAllasync(x => x.Inventario_Id == InventarioId, include: source=> source.Include(x=> x.Producto).Include(x=> x.Usuario));
                 var MovimientosDTO = _mapper.Map<List<MovimientoInventarioDTO>>(Movimientos);
                 return Ok(new { success = true, data = MovimientosDTO });
             }catch(Exception ex)
@@ -85,7 +85,7 @@ namespace API_Inventario.Controllers
                     await _ctx.Producto.AddAsync(Producto_Cat);
                     await _ctx.SaveAsync();
                 }
-                var Producto = await _ctx.Producto_Inventario.GetFirstOrdefaultAsync(x => x.Codigo == item.Codigo);
+                var Producto = await _ctx.Producto_Inventario.GetFirstOrdefaultAsync(x => x.Codigo == item.Codigo && x.Inventario_Id==item.Inventario_Id);
                 if(Producto == null)
                 {
                     T_Producto_Inventario Producto_inv = new T_Producto_Inventario
@@ -128,5 +128,21 @@ namespace API_Inventario.Controllers
                 return StatusCode(500, new { success = false, mensaje = "Error del lado del servidor" });
             }
         }
+
+        [HttpDelete("{MovimientoId:int}")]
+        public async Task<IActionResult> Delete(int MovimientoId)
+        {
+            try
+            {
+                await _ctx.Movimiento_Inventario.SoftDelete(MovimientoId);
+                await _ctx.SaveAsync();
+                return Ok(new { success=true, mensaje="Movimiento eliminado con éxito" });
+            }catch(Exception ex)
+            {
+                _logger.LogError($"{ex.Message} => {ex.StackTrace}");
+                return StatusCode(500, new { success = false, mensaje = "Error del lado del servidor" });
+            }
+        }
+        
     }
 }

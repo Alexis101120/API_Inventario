@@ -46,6 +46,7 @@ namespace API_Inventario
                 options.User.RequireUniqueEmail = false;
             }).AddEntityFrameworkStores<ApplicationDbContext>().AddDefaultTokenProviders();
             services.AddScoped<IContenedorTrabajo, ContenedorTrabajo>();
+            services.AddScoped<IEmailService, EmailService>();
             services.AddTransient<IAlmacenadorArchivos, AlmacenadorArchivos>();
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(opciones =>
