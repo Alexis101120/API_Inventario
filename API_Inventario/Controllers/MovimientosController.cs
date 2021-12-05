@@ -55,7 +55,7 @@ namespace API_Inventario.Controllers
             {
                 var Movimientos = await _ctx.Movimiento_Inventario.GetAllasync(x => x.Inventario_Id == InventarioId, include: source=> source.Include(x=> x.Producto).Include(x=> x.Usuario));
                 var MovimientosDTO = _mapper.Map<List<MovimientoInventarioDTO>>(Movimientos);
-                return Ok(new { success = true, data = MovimientosDTO });
+                return Ok(new { success = true, data = MovimientosDTO.OrderByDescending(x=> x.Fech_Registro) });
             }catch(Exception ex)
             {
                 _logger.LogError($"{ex.Message} => {ex.StackTrace}");

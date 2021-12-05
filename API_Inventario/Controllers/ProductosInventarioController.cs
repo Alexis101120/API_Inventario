@@ -37,7 +37,7 @@ namespace API_Inventario.Controllers
             {
                 var Productos = await _ctx.Producto_Inventario.GetAllasync(x => x.Inventario_Id == InventarioId, include:source=> source.Include(x=> x.Producto));
                 var ProductosDTO = _mapper.Map<List<Producto_Inventario_DTO>>(Productos);
-                return Ok(new { success = true, data = ProductosDTO });
+                return Ok(new { success = true, data = ProductosDTO.OrderByDescending(x=> x.Id).ToList() });
             }catch(Exception ex)
             {
                 _logger.LogError($"{ex.Message} => {ex.StackTrace}");

@@ -65,7 +65,7 @@ namespace API_Inventario.Controllers
             {
                 var Inventarios = await _ctx.Inventario.GetAllasync(x => x.Tienda_id == TiendaId, include: source=> source.Include(x=> x.Usuario));
                 var Inventarios_DTO = _mapper.Map<List<InventarioDTO>>(Inventarios);
-                return Ok(new { success = true, data = Inventarios_DTO });
+                return Ok(new { success = true, data = Inventarios_DTO.OrderByDescending(x=> x.Id).ToList() });
             }catch(Exception ex)
             {
                 _logger.LogError($"{ex.Message} => {ex.StackTrace}");
