@@ -92,7 +92,8 @@ namespace API_Inventario.Controllers
                     string Ruta_Temporales = Path.Combine(Ruta_Principal, @"Temporales\");
                     string Nombre_Archivo = item.Excel.FileName;
                     if (!Directory.Exists(Ruta_Temporales)) Directory.CreateDirectory(Ruta_Temporales);
-                    using (var filestram = new FileStream(Path.Combine(Ruta_Temporales, Nombre_Archivo), FileMode.Create))
+                    var Ruta_Archivo = Path.Combine(Ruta_Temporales, Nombre_Archivo);
+                    using (var filestram = new FileStream(Ruta_Archivo, FileMode.Create))
                     {
                         await item.Excel.CopyToAsync(filestram);
                     }
@@ -117,10 +118,15 @@ namespace API_Inventario.Controllers
                                     Descripcion = Convert.ToString(worksheet.Cells[Fila, 2].Value.ToString().Trim()),
                                     Tienda_Id = item.TiendaId
                                 };
-                                Productos.Add(Producto);
+                                var Producto_Bd = await _ctx.Producto.GetFirstOrdefaultAsync(x => x.Codigo == Producto.Codigo && x.Tienda_Id == Producto.Tienda_Id);
+                                var Producto_Lista = Productos.FirstOrDefault(x => x.Codigo == Producto.Codigo);
+                                if(Producto_Bd == null && Producto_Lista == null)
+                                {
+                                    Productos.Add(Producto);
+                                }   
                             }
-
                             _ctx.Producto.BulkInsert(Productos);
+                            System.IO.File.Delete(Ruta_Archivo);
                             return Ok(new { success = true, mensaje = "Productos agregados con éxito" });
                         }
                     }

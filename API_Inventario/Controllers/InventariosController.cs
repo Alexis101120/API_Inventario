@@ -256,11 +256,168 @@ namespace API_Inventario.Controllers
             }
             catch (Exception ex)
             {
-
+                _logger.LogError($"{ex.Message} => {ex.StackTrace}");
+                return StatusCode(500, new { success = false, mensaje = "Error del lado del servidor" });
             }
-            return Ok();
         }
 
+        [HttpPost("CalcularDiferencias")]
+        [AllowAnonymous]
+        public async Task<IActionResult> CalcularDiferencias([FromForm] Existencias_DTO item)
+        {
+            try
+            {
+                if (item.Excel != null)
+                {
+                    var Ruta_Principal = _host.WebRootPath;
+                    string Ruta_Temporales = Path.Combine(Ruta_Principal, @"Temporales\");
+                    string Nombre_Archivo = item.Excel.FileName;
+                    if (!Directory.Exists(Ruta_Temporales)) Directory.CreateDirectory(Ruta_Temporales);
+                    var Ruta_Archivo = Path.Combine(Ruta_Temporales, Nombre_Archivo);
+                    var Existencias = new List<Existencias_Sistema>();
+                    using (var filestram = new FileStream(Ruta_Archivo, FileMode.Create))
+                    {
+                        await item.Excel.CopyToAsync(filestram);
+                    }
+                    FileInfo file = new FileInfo(Path.Combine(Ruta_Temporales, Nombre_Archivo));
+                    ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+                    using (ExcelPackage package = new ExcelPackage(file))
+                    {
+                        ExcelWorksheet worksheet = package.Workbook.Worksheets.FirstOrDefault();
+                        if (worksheet == null)
+                        {
+                            return NotFound(new { codigo = "404", mensaje = "Error al cargar datos, verifique su archivo" });
+                        }
+                        else
+                        {
+                            var Numero_Filas = worksheet.Dimension.Rows;
+                            for (int Fila = 2; Fila <= Numero_Filas; Fila++)
+                            {
+                                var Producto = new Existencias_Sistema
+                                {
+                                    Codigo = Convert.ToString(worksheet.Cells[Fila, 1].Value.ToString().Trim()),
+                                    Descripcion = Convert.ToString(worksheet.Cells[Fila, 2].Value.ToString().Trim()),
+                                    Existencia = Convert.ToInt32(worksheet.Cells[Fila, 3].Value.ToString().Trim())
+                                };
+                                var Producto_Lista = Existencias.FirstOrDefault(x => x.Codigo == Producto.Codigo);
+                                if (Producto_Lista == null)
+                                {
+                                    Existencias.Add(Producto);
+                                }
+                            }
 
+                            if(System.IO.File.Exists(Ruta_Archivo))System.IO.File.Delete(Ruta_Archivo);
+                        }
+                    }
+                    var Productos = await _ctx.Producto_Inventario.GetAllasync(x => x.Inventario_Id == item.Inventario_Id, include: source => source.Include(x => x.Producto));
+                    using (MemoryStream ms = new MemoryStream())
+                    {
+                        ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+                        using (ExcelPackage ep = new ExcelPackage())
+                        {
+                            Color colFromHex = System.Drawing.ColorTranslator.FromHtml("#98A6A7");
+                            ep.Workbook.Worksheets.Add("Inventario");
+                            ExcelWorksheet ew = ep.Workbook.Worksheets[0];
+                            int col = 1;
+                            ew.Cells[2, col].Value = "Codigo";
+                            ew.Cells[2, col].Style.Font.Size = 12;
+                            ew.Cells[2, col].AutoFitColumns();
+                            ew.Cells[2, col].Style.Font.Bold = true;
+                            ew.Cells[2, col].Style.Fill.PatternType = ExcelFillStyle.Solid;
+                            ew.Cells[2, col].Style.Fill.BackgroundColor.SetColor(colFromHex);
+                            ew.Cells[2, col].Style.Border.BorderAround(OfficeOpenXml.Style.ExcelBorderStyle.Thin);
+                            col++;
+                            ew.Cells[2, col].Value = "Descripción";
+                            ew.Cells[2, col].Style.Font.Size = 12;
+                            ew.Cells[2, col].AutoFitColumns();
+                            ew.Cells[2, col].Style.Font.Bold = true;
+                            ew.Cells[2, col].Style.Fill.PatternType = ExcelFillStyle.Solid;
+                            ew.Cells[2, col].Style.Fill.BackgroundColor.SetColor(colFromHex);
+                            ew.Cells[2, col].Style.Border.BorderAround(OfficeOpenXml.Style.ExcelBorderStyle.Thin);
+                            col++;
+
+                            ew.Cells[2, col].Value = "Existencias sistema";
+                            ew.Cells[2, col].Style.Font.Size = 12;
+                            ew.Cells[2, col].AutoFitColumns();
+                            ew.Cells[2, col].Style.Font.Bold = true;
+                            ew.Cells[2, col].Style.Fill.PatternType = ExcelFillStyle.Solid;
+                            ew.Cells[2, col].Style.Fill.BackgroundColor.SetColor(colFromHex);
+                            ew.Cells[2, col].Style.Border.BorderAround(OfficeOpenXml.Style.ExcelBorderStyle.Thin);
+                            col++;
+
+                            ew.Cells[2, col].Value = "Conteo";
+                            ew.Cells[2, col].Style.Font.Size = 12;
+                            ew.Cells[2, col].AutoFitColumns();
+                            ew.Cells[2, col].Style.Font.Bold = true;
+                            ew.Cells[2, col].Style.Fill.PatternType = ExcelFillStyle.Solid;
+                            ew.Cells[2, col].Style.Fill.BackgroundColor.SetColor(colFromHex);
+                            ew.Cells[2, col].Style.Border.BorderAround(OfficeOpenXml.Style.ExcelBorderStyle.Thin);
+                            col++;
+
+                            ew.Cells[2, col].Value = "Diferencia";
+                            ew.Cells[2, col].Style.Font.Size = 12;
+                            ew.Cells[2, col].AutoFitColumns();
+                            ew.Cells[2, col].Style.Font.Bold = true;
+                            ew.Cells[2, col].Style.Fill.PatternType = ExcelFillStyle.Solid;
+                            ew.Cells[2, col].Style.Fill.BackgroundColor.SetColor(colFromHex);
+                            ew.Cells[2, col].Style.Border.BorderAround(OfficeOpenXml.Style.ExcelBorderStyle.Thin);
+                            col++;
+
+                            col = 1;
+                            int i = 3;
+                            foreach(var producto in Productos)
+                            {
+                                col = 1;
+                                var Producto_Sistema = Existencias.FirstOrDefault(x => x.Codigo == producto.Codigo);
+                                ew.Cells[i, col].Value = producto.Codigo;
+                                ew.Cells[i, col].Style.Font.Size = 12;
+                                ew.Cells[i, col].AutoFitColumns();
+                                ew.Cells[i, col].Style.Font.Bold = false;
+                                ew.Cells[i, col].Style.Border.BorderAround(OfficeOpenXml.Style.ExcelBorderStyle.Thin);
+                                col++;
+
+                                ew.Cells[i, col].Value = producto.Producto.Descripcion;
+                                ew.Cells[i, col].Style.Font.Size = 12;
+                                ew.Cells[i, col].AutoFitColumns();
+                                ew.Cells[i, col].Style.Font.Bold = false;
+                                ew.Cells[i, col].Style.Border.BorderAround(OfficeOpenXml.Style.ExcelBorderStyle.Thin);
+                                col++;
+
+                                ew.Cells[i, col].Value = Producto_Sistema == null ? "Sin registro" : Producto_Sistema.Existencia;
+                                ew.Cells[i, col].Style.Font.Size = 12;
+                                ew.Cells[i, col].AutoFitColumns();
+                                ew.Cells[i, col].Style.Font.Bold = false;
+                                ew.Cells[i, col].Style.Border.BorderAround(OfficeOpenXml.Style.ExcelBorderStyle.Thin);
+                                col++;
+
+                                ew.Cells[i, col].Value = producto.Existencia;
+                                ew.Cells[i, col].Style.Font.Size = 12;
+                                ew.Cells[i, col].AutoFitColumns();
+                                ew.Cells[i, col].Style.Font.Bold = false;
+                                ew.Cells[i, col].Style.Border.BorderAround(OfficeOpenXml.Style.ExcelBorderStyle.Thin);
+                                col++;
+
+                                ew.Cells[i, col].Value = Producto_Sistema == null ? "Sin registro" : (producto.Existencia - Producto_Sistema.Existencia);
+                                ew.Cells[i, col].Style.Font.Size = 12;
+                                ew.Cells[i, col].AutoFitColumns();
+                                ew.Cells[i, col].Style.Font.Bold = false;
+                                ew.Cells[i, col].Style.Border.BorderAround(OfficeOpenXml.Style.ExcelBorderStyle.Thin);
+                                col++;
+                                i++;
+                            }
+                            ep.SaveAs(ms);
+                            byte[] buffer = ms.ToArray();
+                            return File(buffer, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileDownloadName: "Byformula.xlsx");
+                        }
+                    }
+                }
+                return Ok(new { success = true, mensaje = "No hay excel" });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"{ex.Message} => {ex.StackTrace}");
+                return StatusCode(500, new { success = false, mensaje = "Error del lado del servidor" });
+            }
+        }
     }
 }
